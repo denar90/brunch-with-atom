@@ -1,0 +1,39 @@
+{
+  "name": "brunch-with-atom",
+  "main": "./lib/brunch-with-atom",
+  "version": "0.0.0",
+  "description": "Atom package for Brunch",
+  "author": "denar90",
+  "keywords": [
+    "atom",
+    "build tool",
+    "pipeline",
+    "builder",
+    "assembler",
+    "stack",
+    "workflow",
+    "source map",
+    "incremental",
+    "config",
+    "react",
+    "webpack",
+    "browserify",
+    "grunt",
+    "gulp",
+    "broccoli",
+    "backbone",
+    "ember",
+    "angular",
+    "chaplin",
+    "html5"
+  ],
+  "repository": "https://github.com/denar90/brunch-with-atom",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+    "atom-space-pen-views": "^2.2.0",
+    "brunch": "^2.6.0"
+  }
+}

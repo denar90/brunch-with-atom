@@ -1,0 +1,46 @@
+# See https://atom.io/docs/latest/hacking-atom-package-word-count#menus for more details
+'context-menu':
+  'atom-text-editor': [
+    {
+      'label': 'Brunch new'
+      'command': 'brunch:new'
+    },
+    {
+      'label': 'Brunch build'
+      'command': 'brunch:build'
+    },
+    {
+      'label': 'Brunch watch'
+      'command': 'brunch:watch'
+    }
+    {
+      'label': 'Brunch stop'
+      'command': 'brunch:stop'
+    }
+  ]
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'Brunch'
+      'submenu': [
+        {
+          'label': 'New'
+          'command': 'brunch:new'
+        },
+        {
+          'label': 'Build'
+          'command': 'brunch:build'
+        },
+        {
+          'label': 'Watch'
+          'command': 'brunch:watch'
+        }
+        {
+          'label': 'Stop'
+          'command': 'brunch:stop'
+        }
+      ]
+    ]
+  }
+]
