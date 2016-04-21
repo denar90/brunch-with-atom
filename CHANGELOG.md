@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 ## [0.1.1] - 2016-04-21
 ###Changed
 - docs
-- 
+
 ## [0.1.0] - 2016-04-21
 ###Added
 - offline work
