@@ -1,4 +1,4 @@
-# brunch-with-atom package
+# Atom package for Brunch
 
 This is atom package for [Brunch](http://brunch.io/)
 
