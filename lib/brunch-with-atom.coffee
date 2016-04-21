@@ -19,6 +19,22 @@ module.exports =
   process: null
 
   activate: (state) ->
+    try
+      @activateBrunchMenu()
+    catch error
+      atom.notifications.addWarning('Brunch couldn\'t get sekeltons')
+      atom.notifications.addWarning('Brunch command `new` will be not avaliable')
+
+    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+    @subscriptions = new CompositeDisposable
+
+    # Register command that toggles this view
+    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:new": => @warmBrunch(commands.NEW)
+    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:build": => @warmBrunch(commands.BUILD)
+    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:watch": => @warmBrunch(commands.WATCH)
+    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:stop": => @warmBrunch(commands.STOP)
+
+  activateBrunchMenu: ->
     self = @
     callback = (response) ->
       #init modal panel for sekeltons list
@@ -33,15 +49,6 @@ module.exports =
     # get available skeletons
     $.get skeletonsUrl, callback, 'json'
 
-    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-    @subscriptions = new CompositeDisposable
-
-    # Register command that toggles this view
-    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:new": => @warmBrunch(commands.NEW)
-    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:build": => @warmBrunch(commands.BUILD)
-    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:watch": => @warmBrunch(commands.WATCH)
-    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:stop": => @warmBrunch(commands.STOP)
-
   deactivate: ->
     @modalPanel.destroy()
     @subscriptions.dispose()
@@ -53,7 +60,8 @@ module.exports =
 
     switch type
       when commands.NEW
-        @modalPanel.showModalPanel()
+        if @modalPanel
+          @modalPanel.showModalPanel()
       when commands.BUILD
         @runBrunchCommand([type])
       when commands.WATCH
@@ -63,9 +71,10 @@ module.exports =
         atom.notifications.addSuccess('Brunch has been eaten :)')
 
   runBrunchCommand: (command) ->
+    atom.notifications.addSuccess('Brunch has been started :)')
     @stopBrunchProcess()
     args = command
-    stdout = (line) -> atom.notifications.addSuccess(line)
+    stdout = (line) -> atom.notifications.addWarning(line)
     stderr = (line) -> atom.notifications.addWarning(line)
     exit = (code) -> atom.notifications.addSuccess("The process exited with code: #{code}")
     path = atom.project.getPaths()[0]
