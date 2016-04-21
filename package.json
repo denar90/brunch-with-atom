@@ -1,7 +1,7 @@
 {
   "name": "brunch-with-atom",
   "main": "./lib/brunch-with-atom",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Atom package for Brunch",
   "author": "denar90",
   "keywords": [
