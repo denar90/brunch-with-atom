@@ -1,4 +1,5 @@
 {SelectListView} = require 'atom-space-pen-views'
+_ = require 'underscore'
 
 module.exports =
   class BrunchMenu extends SelectListView
@@ -13,19 +14,28 @@ module.exports =
     showModalPanel: (type) ->
       @panel ?= atom.workspace.addModalPanel(item: this, visible: false)
       @addClass('overlay from-top')
-      @setItems(@menuItems)
+      @setItems(@getMenuItemsDescription())
       @panel.show()
       @focusFilterEditor()
 
     viewForItem: (item) ->
-      if item.selected
-        "<li data-selected='true'>#{item.description}</li>"
+      menuItem = @getMenuItemByDescription(item)
+      if menuItem.selected
+        "<li data-selected='true'>#{menuItem.description}</li>"
       else
-        "<li>#{item.description}</li>"
+        "<li>#{menuItem.description}</li>"
 
     confirmed: (item) ->
-      @afterConfirmed.apply(@, [item])
+      menuItem = @getMenuItemByDescription(item)
+      @afterConfirmed.apply(@, [menuItem])
       @cancelled()
 
     cancelled: ->
       @panel.hide()
+
+    getMenuItemsDescription: ->
+      _.map @menuItems, (item, index) ->
+        item.description
+
+    getMenuItemByDescription: (description) ->
+      _.findWhere @menuItems, {description: description}
