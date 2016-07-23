@@ -1,6 +1,5 @@
-{CompositeDisposable, BufferedNodeProcess, NotificationManager} = require 'atom'
+{CompositeDisposable, BufferedProcess, BufferedNodeProcess, NotificationManager} = require 'atom'
 {$} = require 'atom-space-pen-views'
-Promise = require('bluebird');
 gitty = require 'gitty';
 BrunchMenu = require './brunch-menu'
 skeletonsUrl = 'https://raw.githubusercontent.com/brunch/skeletons/master/skeletons.json'
@@ -43,14 +42,14 @@ module.exports =
 
   activateSkeletonsMenu: ->
     self = @
-    callback = (response) ->
+    callback = (response) =>
       #init modal panel for sekeltons list
-      self.chooseSkeletonModal = new BrunchMenu({
+      @chooseSkeletonModal = new BrunchMenu({
         #set list skeletons for panel
         menuItems: getSkeletonsWithAliases(response.skeletons)
-        afterConfirmed: (item) ->
+        afterConfirmed: (menuItem) =>
           #run brunch command when item in panel was choosen
-          self.runBrunchCommand(['new', item.alias])
+          @runBrunchCommand(['new', menuItem.alias])
       })
 
     # get available skeletons
@@ -58,8 +57,8 @@ module.exports =
 
   activateVersionsMenu: ->
     self = @
-    @repo = gitty("#{atom.packages.getPackageDirPaths()}/brunch-with-atom/brunch")
-    @repo.getTags (error, tags) ->
+    @repo = gitty(@getBrunchRepoPath())
+    @repo.getTags (error, tags) =>
       if error
         atom.notifications.addError(error)
 
@@ -80,12 +79,13 @@ module.exports =
           selected: selected
         }
 
-      self.changeVersionModal = new BrunchMenu({
+      @changeVersionModal = new BrunchMenu({
         menuItems: menuItems
-        afterConfirmed: (item) ->
+        afterConfirmed: (menuItem) =>
           #run brunch command when item in panel was choosen
-          self.repo.checkoutSync(item.tag)
-          atom.notifications.addSuccess("Brunch version was chenged to #{item.tag}")
+          @repo.checkoutSync(menuItem.tag)
+          atom.notifications.addSuccess("Brunch version was chenged to #{menuItem.tag}")
+          @updateBrunch()
       })
 
   deactivate: ->
@@ -115,14 +115,15 @@ module.exports =
   runBrunchCommand: (command) ->
     atom.notifications.addSuccess('Brunch has been started :)')
     @stopBrunchProcess()
+    path = atom.project.getPaths()[0]
+    brunchRepoPath = @getBrunchRepoPath()
+
     args = command
     stdout = (line) -> atom.notifications.addWarning(line)
     stderr = (line) -> atom.notifications.addWarning(line)
     exit = (code) -> atom.notifications.addSuccess("The process exited with code: #{code}")
-    path = atom.project.getPaths()[0]
-    packagePath = "#{atom.packages.getPackageDirPaths()}/brunch-with-atom"
     @process = new BufferedNodeProcess({
-      command: "#{packagePath}/brunch/.bin/brunch",
+      command: "#{brunchRepoPath}/bin/brunch",
       options: {
         cwd: path
       },
@@ -138,9 +139,30 @@ module.exports =
       @process.kill()
       @process = null
 
+  getBrunchRepoPath: ->
+    return "#{atom.packages.getPackageDirPaths()}/brunch-with-atom/brunch"
+
   brunchIsReady: ->
     projectPath = atom.project.getPaths()[0]
     if projectPath
       return true
     else
       return false
+
+  updateBrunch: ->
+    atom.notifications.addSuccess("Brunch update was started. Wait untill success message.")
+    path = atom.project.getPaths()[0]
+    brunchRepoPath = @getBrunchRepoPath()
+    stdout = (line) -> atom.notifications.addWarning(line)
+    stderr = (line) -> atom.notifications.addWarning(line)
+    exit = (code) -> atom.notifications.addSuccess("Brunch is ready to use.")
+    process = new BufferedProcess({
+      command: 'bash'
+      args: ['update-brunch.sh'],
+      options: {
+        cwd: path
+      },
+      stdout: stdout,
+      stderr: stderr,
+      exit: exit
+    })

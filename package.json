@@ -36,6 +36,10 @@
     "atom-space-pen-views": "^2.2.0"
   },
   "devDependencies": {
-    "gitty": "^3.3.6"
+    "gitty": "^3.3.6",
+    "underscore": "^1.8.3"
+  },
+  "scripts": {
+    "postinstall": "bash ./update-brunch.sh"
   }
 }
