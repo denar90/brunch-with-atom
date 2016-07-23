@@ -2,23 +2,26 @@
 
 module.exports =
   class BrunchMenu extends SelectListView
-    skeletons: []
+    menuItems: []
     afterConfirmed: Function.prototype
 
     constructor: (options) ->
       super()
       @afterConfirmed = options.afterConfirmed || @afterConfirmed
-      @skeletons = options.skeletons || @skeletons
+      @menuItems = options.menuItems || @menuItems
 
     showModalPanel: (type) ->
       @panel ?= atom.workspace.addModalPanel(item: this, visible: false)
       @addClass('overlay from-top')
-      @setItems(@skeletons)
+      @setItems(@menuItems)
       @panel.show()
       @focusFilterEditor()
 
     viewForItem: (item) ->
-      "<li>#{item.description}</li>"
+      if item.selected
+        "<li data-selected='true'>#{item.description}</li>"
+      else
+        "<li>#{item.description}</li>"
 
     confirmed: (item) ->
       @afterConfirmed.apply(@, [item])
