@@ -1,4 +1,4 @@
-{CompositeDisposable, BufferedNodeProcess, NotificationManager} = require 'atom'
+{CompositeDisposable, BufferedProcess, BufferedNodeProcess, NotificationManager} = require 'atom'
 {$} = require 'atom-space-pen-views'
 gitty = require 'gitty';
 BrunchMenu = require './brunch-menu'
@@ -85,6 +85,7 @@ module.exports =
           #run brunch command when item in panel was choosen
           @repo.checkoutSync(menuItem.tag)
           atom.notifications.addSuccess("Brunch version was chenged to #{menuItem.tag}")
+          @updateBrunch()
       })
 
   deactivate: ->
@@ -147,3 +148,21 @@ module.exports =
       return true
     else
       return false
+
+  updateBrunch: ->
+    atom.notifications.addSuccess("Brunch update was started. Wait untill success message.")
+    path = atom.project.getPaths()[0]
+    brunchRepoPath = @getBrunchRepoPath()
+    stdout = (line) -> atom.notifications.addWarning(line)
+    stderr = (line) -> atom.notifications.addWarning(line)
+    exit = (code) -> atom.notifications.addSuccess("Brunch is ready to use.")
+    process = new BufferedProcess({
+      command: 'bash'
+      args: ['update-brunch.sh'],
+      options: {
+        cwd: path
+      },
+      stdout: stdout,
+      stderr: stderr,
+      exit: exit
+    })
