@@ -1,0 +1,3 @@
+[submodule "brunch"]
+	path = brunch
+	url = https://github.com/brunch/brunch

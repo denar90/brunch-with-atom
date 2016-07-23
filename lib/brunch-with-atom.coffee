@@ -1,5 +1,7 @@
 {CompositeDisposable, BufferedNodeProcess, NotificationManager} = require 'atom'
 {$} = require 'atom-space-pen-views'
+Promise = require('bluebird');
+gitty = require 'gitty';
 BrunchMenu = require './brunch-menu'
 skeletonsUrl = 'https://raw.githubusercontent.com/brunch/skeletons/master/skeletons.json'
 #const commands
@@ -7,20 +9,24 @@ commands = {
   NEW: 'new',
   BUILD: 'build',
   WATCH: 'watch',
-  STOP: 'stop'
+  STOP: 'stop',
+  CHANGE_VERSION: 'change_version'
 }
 
 getSkeletonsWithAliases = (skeletons) ->
   item for item in skeletons when item.alias != undefined
 
 module.exports =
-  modalPanel: null
+  chooseSkeletonModal: null
+  changeVersionModal: null
   subscriptions: null
   process: null
+  repo: null
 
   activate: (state) ->
     try
-      @activateBrunchMenu()
+      @activateSkeletonsMenu()
+      @activateVersionsMenu()
     catch error
       atom.notifications.addWarning('Brunch couldn\'t get sekeltons')
       atom.notifications.addWarning('Brunch command `new` will be not avaliable')
@@ -33,14 +39,15 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace', "brunch:build": => @warmBrunch(commands.BUILD)
     @subscriptions.add atom.commands.add 'atom-workspace', "brunch:watch": => @warmBrunch(commands.WATCH)
     @subscriptions.add atom.commands.add 'atom-workspace', "brunch:stop": => @warmBrunch(commands.STOP)
+    @subscriptions.add atom.commands.add 'atom-workspace', "brunch:change_version": => @warmBrunch(commands.CHANGE_VERSION)
 
-  activateBrunchMenu: ->
+  activateSkeletonsMenu: ->
     self = @
     callback = (response) ->
       #init modal panel for sekeltons list
-      self.modalPanel = new BrunchMenu({
+      self.chooseSkeletonModal = new BrunchMenu({
         #set list skeletons for panel
-        skeletons: getSkeletonsWithAliases(response.skeletons)
+        menuItems: getSkeletonsWithAliases(response.skeletons)
         afterConfirmed: (item) ->
           #run brunch command when item in panel was choosen
           self.runBrunchCommand(['new', item.alias])
@@ -49,8 +56,41 @@ module.exports =
     # get available skeletons
     $.get skeletonsUrl, callback, 'json'
 
+  activateVersionsMenu: ->
+    self = @
+    @repo = gitty("#{atom.packages.getPackageDirPaths()}/brunch-with-atom/brunch")
+    @repo.getTags (error, tags) ->
+      if error
+        atom.notifications.addError(error)
+
+      currentBranch = self.repo.getBranchesSync()
+
+      tags = tags.reverse()
+      menuItems = [];
+
+      $.each tags, (index, tag) ->
+        selected = false;
+
+        if currentBranch.current.indexOf(tag) isnt -1
+          selected = true;
+
+        menuItems.push {
+          description: tag,
+          tag: tag,
+          selected: selected
+        }
+
+      self.changeVersionModal = new BrunchMenu({
+        menuItems: menuItems
+        afterConfirmed: (item) ->
+          #run brunch command when item in panel was choosen
+          self.repo.checkoutSync(item.tag)
+          atom.notifications.addSuccess("Brunch version was chenged to #{item.tag}")
+      })
+
   deactivate: ->
-    @modalPanel.destroy()
+    @chooseSkeletonModal.destroy()
+    @changeVersionModal.destroy()
     @subscriptions.dispose()
 
   warmBrunch: (type) ->
@@ -60,8 +100,8 @@ module.exports =
 
     switch type
       when commands.NEW
-        if @modalPanel
-          @modalPanel.showModalPanel()
+        if @chooseSkeletonModal
+          @chooseSkeletonModal.showModalPanel()
       when commands.BUILD
         @runBrunchCommand([type])
       when commands.WATCH
@@ -69,6 +109,8 @@ module.exports =
       when commands.STOP
         @stopBrunchProcess()
         atom.notifications.addSuccess('Brunch has been eaten :)')
+      when commands.CHANGE_VERSION
+        @changeVersionModal.showModalPanel()
 
   runBrunchCommand: (command) ->
     atom.notifications.addSuccess('Brunch has been started :)')
@@ -80,7 +122,7 @@ module.exports =
     path = atom.project.getPaths()[0]
     packagePath = "#{atom.packages.getPackageDirPaths()}/brunch-with-atom"
     @process = new BufferedNodeProcess({
-      command: "#{packagePath}/node_modules/.bin/brunch",
+      command: "#{packagePath}/brunch/.bin/brunch",
       options: {
         cwd: path
       },

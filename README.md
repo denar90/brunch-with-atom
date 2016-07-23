@@ -10,12 +10,13 @@ This is atom package for [Brunch](http://brunch.io/)
 
 ## Features
 
- - creates new `brunch` skeleton
- - builds/watches your project using `brunch`
+ - creates new `Brunch` skeleton
+ - builds/watches your project using `Brunch`
+ - uses different `Brunch` versions
 
 ## How to use
 
- - go to `Packages->Brunch`. Select `new`, `build`, `watch` (depends on your needs)
+ - go to `Packages->Brunch`. Select `new`, `build`, `watch`, `change version` (depends on your needs)
  - run context menu and choose `Brunch new`, `Brunch build`, `Brunch watch` or
  `Brunch stop` (depends on your needs)
 
@@ -23,14 +24,16 @@ This is atom package for [Brunch](http://brunch.io/)
 
 ## Commands
 
- `Brunch new` creates skeleton from [brunch skeletons list](http://brunch.io/skeletons)
+ - `Brunch new` creates skeleton from [brunch skeletons list](http://brunch.io/skeletons)
  > Notice: There present only skeletons which have aliases in [brunch skeletons list](http://brunch.io/skeletons)
 
- `Brunch build` builds a brunch project and places the output into `public` directory
+ - `Brunch build` builds a `Brunch` project and places the output into `public` directory
 
- `Brunch watch` watches brunch app directory for changes and rebuilds the whole project when they happen.
+ - `Brunch watch` watches `Brunch` app directory for changes and rebuilds the whole project when they happen.
 
- `Brunch stop` stops `build` or `watch` process.
+ - `Brunch stop` stops `build` or `watch` process.
+
+ - `Brunch change version` changes version of `Brunch` due to selected one.
 
  For more `Brunch` doc look [here](https://github.com/brunch/brunch/blob/master/docs/commands.md)
 

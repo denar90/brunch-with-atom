@@ -39,6 +39,10 @@
         {
           'label': 'Stop'
           'command': 'brunch:stop'
+        },
+        {
+          'label': 'Change version'
+          'command': 'brunch:change_version'
         }
       ]
     ]
