@@ -39,3 +39,7 @@ This is atom package for [Brunch](http://brunch.io/)
 
 
  If you don't have internet connection it will work fine, but without generating skeletons.
+
+##License
+
+MIT © [Artem Denysov](https://github.com/denar90)
