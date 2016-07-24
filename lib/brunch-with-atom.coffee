@@ -25,7 +25,6 @@ module.exports =
   activate: (state) ->
     try
       @activateSkeletonsMenu()
-      @activateVersionsMenu()
     catch error
       atom.notifications.addWarning('Brunch couldn\'t get sekeltons')
       atom.notifications.addWarning('Brunch command `new` will be not avaliable')
@@ -41,7 +40,6 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace', "brunch:change_version": => @warmBrunch(commands.CHANGE_VERSION)
 
   activateSkeletonsMenu: ->
-    self = @
     callback = (response) =>
       #init modal panel for sekeltons list
       @chooseSkeletonModal = new BrunchMenu({
@@ -56,37 +54,33 @@ module.exports =
     $.get skeletonsUrl, callback, 'json'
 
   activateVersionsMenu: ->
-    self = @
     @repo = gitty(@getBrunchRepoPath())
-    @repo.getTags (error, tags) =>
-      if error
-        atom.notifications.addError(error)
+    tags = @repo.getTagsSync()
+    currentBranch = @repo.getBranchesSync()
 
-      currentBranch = self.repo.getBranchesSync()
+    tags = tags.reverse()
+    menuItems = [];
 
-      tags = tags.reverse()
-      menuItems = [];
+    $.each tags, (index, tag) ->
+      selected = false;
 
-      $.each tags, (index, tag) ->
-        selected = false;
+      if currentBranch.current.indexOf(tag) isnt -1
+        selected = true;
 
-        if currentBranch.current.indexOf(tag) isnt -1
-          selected = true;
+      menuItems.push {
+        description: tag,
+        tag: tag,
+        selected: selected
+      }
 
-        menuItems.push {
-          description: tag,
-          tag: tag,
-          selected: selected
-        }
-
-      @changeVersionModal = new BrunchMenu({
-        menuItems: menuItems
-        afterConfirmed: (menuItem) =>
-          #run brunch command when item in panel was choosen
-          @repo.checkoutSync(menuItem.tag)
-          atom.notifications.addSuccess("Brunch version was chenged to #{menuItem.tag}")
-          @updateBrunch()
-      })
+    @changeVersionModal = new BrunchMenu({
+      menuItems: menuItems
+      afterConfirmed: (menuItem) =>
+        #run brunch command when item in panel was choosen
+        @repo.checkoutSync(menuItem.tag)
+        atom.notifications.addSuccess("Brunch version was chenged to #{menuItem.tag}")
+        @updateBrunch()
+    })
 
   deactivate: ->
     @chooseSkeletonModal.destroy()
@@ -110,6 +104,7 @@ module.exports =
         @stopBrunchProcess()
         atom.notifications.addSuccess('Brunch has been eaten :)')
       when commands.CHANGE_VERSION
+        @activateVersionsMenu()
         @changeVersionModal.showModalPanel()
 
   runBrunchCommand: (command) ->
@@ -152,7 +147,6 @@ module.exports =
   updateBrunch: ->
     atom.notifications.addSuccess("Brunch update was started. Wait untill success message.")
     path = atom.project.getPaths()[0]
-    brunchRepoPath = @getBrunchRepoPath()
     stdout = (line) -> atom.notifications.addWarning(line)
     stderr = (line) -> atom.notifications.addWarning(line)
     exit = (code) -> atom.notifications.addSuccess("Brunch is ready to use.")
