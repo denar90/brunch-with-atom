@@ -13,8 +13,13 @@ module.exports =
 
     showModalPanel: (type) ->
       @panel ?= atom.workspace.addModalPanel(item: this, visible: false)
+
       @addClass('overlay from-top')
       @setItems(@getMenuItemsDescription())
+
+      view = @list.find("[data-selected='true']");
+      
+      @selectItemView(view)
       @panel.show()
       @focusFilterEditor()
 
