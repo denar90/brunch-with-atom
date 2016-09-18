@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.3] - 2016-09-18
 ###Fixed
-- Show selected version in menu
+- All dependancies became dev
 
 ## [0.2.2] - 2016-07-24
 ###Fixed
