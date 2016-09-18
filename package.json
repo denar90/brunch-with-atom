@@ -33,9 +33,7 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.2.0"
-  },
-  "devDependencies": {
+    "atom-space-pen-views": "^2.2.0",
     "gitty": "^3.3.6",
     "underscore": "^1.8.3"
   },
